@@ -8,10 +8,9 @@ export function isDataImage(value?: string): value is string {
   return value.startsWith('data:image/') && allowedMimeTypes.includes(mimeType);
 }
 
-export function validateInput(request: { topic?: string; copyImage?: string; designImage?: string }) {
+export function validateInput(request: { topic?: string; copyImage?: string; mainCopy?: string }) {
   if (!request.topic?.trim()) return '새 영상 주제를 입력해줘.';
-  if (!isDataImage(request.copyImage)) return '카피 구조를 가져올 썸네일 이미지를 올려줘.';
-  if (!isDataImage(request.designImage)) return '디자인을 벤치마킹할 썸네일 이미지를 올려줘.';
+  if (!isDataImage(request.copyImage) && !request.mainCopy?.trim()) return '카피 구조 이미지나 메인카피 중 하나는 넣어줘.';
   return '';
 }
 

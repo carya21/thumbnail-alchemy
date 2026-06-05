@@ -2,13 +2,15 @@
 
 카피 구조용 썸네일 1장과 디자인 스타일용 썸네일 1장을 분석해서 새 유튜브 썸네일 ABC안 3개를 생성하는 웹앱입니다. 선택한 1개 안은 한 번 더 수정할 수 있습니다.
 
-## 실행
+## 기능
 
-```bash
-npm install --cache .npm-cache
-npm run build
-npm run start -- --port 3000
-```
+- 단계형 마법사 UI
+- 썸네일 2장 업로드
+- 카피 구조 분석
+- 디자인 스타일 분석
+- 새 영상 주제 기반 ABC 썸네일 생성
+- 선택안 1회 수정
+- 결과 이미지 다운로드
 
 ## 환경변수
 
@@ -18,21 +20,14 @@ ANALYSIS_MODEL=gpt-5.5
 IMAGE_MODEL=gpt-image-2
 ```
 
-## 배포
-
-Vercel 배포 환경변수에 `OPENAI_API_KEY`를 추가하면 수강생들이 바로 사용할 수 있습니다.
+## 로컬 실행
 
 ```bash
-vercel env add OPENAI_API_KEY production
-vercel --prod
+npm install
+npm run build
+npm run start
 ```
 
-## MVP 범위
+## Vercel 배포
 
-- 단계형 마법사 UI
-- 썸네일 2장 업로드
-- 카피 구조 분석
-- 디자인 스타일 분석
-- 새 영상 주제 기반 ABC 썸네일 생성
-- 선택안 1회 수정
-- 결과 이미지 다운로드
+Vercel에서 이 GitHub repo를 Import 한 뒤 Environment Variables에 `OPENAI_API_KEY`를 넣으면 됩니다. 선택으로 `ANALYSIS_MODEL`, `IMAGE_MODEL`도 추가할 수 있습니다.

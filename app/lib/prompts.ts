@@ -3,57 +3,74 @@ import type { AnalysisReport, OptionLabel, ThumbnailOption } from '../types';
 const labels: OptionLabel[] = ['A', 'B', 'C'];
 const fallbackHeadlines = ['이거 모르면 손해', '조회수 차이 나는 이유', '오늘 바로 써먹기'];
 
-export function buildAnalysisPrompt(topic: string, tone?: string) {
+type AnalysisInput = {
+  mainCopy?: string;
+  subCopy?: string;
+  designPrompt?: string;
+  copyImage?: string;
+  designImage?: string;
+};
+
+export function buildAnalysisPrompt(topic: string, tone?: string, input: AnalysisInput = {}) {
+  const directCopy = input.mainCopy?.trim();
+  const copySource = directCopy
+    ? '사용자가 직접 입력한 메인카피/서브카피를 그대로 사용한다.\n메인카피: ' + directCopy + '\n서브카피: ' + (input.subCopy?.trim() || '없음')
+    : '카피 구조 이미지가 있으면 큰 글씨는 메인카피, 작은 글씨는 서브카피로 분석한다.';
+  const designSource = input.designImage
+    ? '디자인 참고 이미지를 분석한다. 문구를 어떻게 부각하는지와 클릭 의도를 함께 본다.'
+    : input.designPrompt?.trim()
+      ? '사용자가 말로 설명한 디자인 참고를 분석한다.\n디자인 설명: ' + input.designPrompt.trim()
+      : '디자인 이미지와 설명이 없으므로 주제와 카피에 맞춰 적절한 디자인을 스스로 판단한다.';
+
   return [
     '너는 유튜브 썸네일 전문 크리에이티브 디렉터야.',
     '',
-    '입력 이미지는 두 장이야.',
-    '1번 이미지는 카피 구조만 분석해. 큰 글씨는 메인카피, 작은 보조 글씨는 서브카피로 분리해.',
-    '문구를 그대로 베끼지 말고 문장의 뼈대와 A/B/C/D 변수 관계만 추출해.',
-    '2번 이미지는 디자인 스타일과 클릭 의도를 분석해. 로고, 캐릭터, 인물, 브랜드 고유 요소는 복제하지 마.',
+    '카피 소스:',
+    copySource,
+    '',
+    '디자인 소스:',
+    designSource,
     '',
     '새 영상 주제: ' + topic,
     '원하는 톤: ' + (tone?.trim() || '똑사장 수강생이 바로 이해하는 실전형'),
     '',
+    '중요 규칙:',
+    '- 사용자가 직접 메인카피를 입력했다면 options의 headline은 반드시 그 메인카피와 정확히 같아야 한다.',
+    '- 사용자가 직접 서브카피를 입력했다면 options의 subline은 반드시 그 서브카피와 정확히 같아야 한다.',
+    '- 직접 카피 입력 모드에서는 ABC안의 문구를 새로 만들지 말고 시각 방향만 다르게 만든다.',
+    '- 이미지 안에는 메인카피 1개와 서브카피 최대 1개 외 작은 글자, 말풍선, 라벨, 배경 텍스트를 넣지 않는다.',
+    '- 카피 구조 이미지를 쓰는 경우에는 문구를 베끼지 말고 문장 뼈대와 A/B/C/D 변수 관계만 추출한다.',
+    '',
     '구조 분석 예시:',
-    '서브카피 원문: 운동하다 빨리 죽습니다!',
-    '서브 뼈대: A 하다가 빨리 B 합니다. A=일반적으로 좋은 결과를 위해 열심히 하는 행동, B=피하고 싶은 나쁜 결과.',
-    '메인카피 원문: 70대 이상은 절대 하면 안되는 치명적 운동 6가지',
-    '메인 뼈대: C는 절대 하면 안 되는 치명적인 D. C=타겟 시청자, D=타겟이 목표를 위해 하려고 하는 행동/방법.',
+    '서브 뼈대: A 하다가 빨리 B 합니다. A=좋은 결과를 위해 열심히 하는 행동, B=피하고 싶은 나쁜 결과.',
+    '메인 뼈대: C는 절대 하면 안 되는 치명적인 D. C=타겟 시청자, D=타겟이 목표를 위해 하려는 행동/방법.',
     '',
     '반드시 한국어 JSON만 반환해. 마크다운 설명은 쓰지 마.',
     '{',
     '  "copyBreakdown": {',
-    '    "mainCopy": "1번 이미지에서 가장 큰 글씨",',
-    '    "subCopy": "1번 이미지에서 작은 보조 글씨. 없으면 빈 문자열",',
-    '    "mainPattern": "메인카피의 문장 뼈대",',
-    '    "subPattern": "서브카피의 문장 뼈대. 없으면 빈 문자열",',
+    '    "mainCopy": "메인카피",',
+    '    "subCopy": "서브카피 또는 빈 문자열",',
+    '    "mainPattern": "메인카피 문장 뼈대",',
+    '    "subPattern": "서브카피 문장 뼈대 또는 빈 문자열",',
     '    "variableMap": ["A=...", "B=...", "C=...", "D=..."],',
-    '    "adaptationGuide": ["새 주제에서 A/B/C/D를 무엇으로 바꿀지", "메인/서브카피 치환 논리"]',
+    '    "adaptationGuide": ["새 주제 치환 가이드", "문구 적용 논리"]',
     '  },',
     '  "designIntent": {',
-    '    "copyEmphasis": ["2번 이미지가 문구를 부각시키는 방식 1", "방식 2"],',
-    '    "clickIntent": ["시청자가 디자인에서 눈에 띄어 클릭할 것 같은 이유 1", "이유 2"],',
-    '    "visualHierarchy": ["가장 먼저 보이는 요소 → 두 번째 요소 → 마지막 요소"]',
+    '    "copyEmphasis": ["문구 부각 방식 1", "방식 2"],',
+    '    "clickIntent": ["클릭 유도 이유 1", "이유 2"],',
+    '    "visualHierarchy": ["시선 순서"]',
     '  },',
-    '  "copyStructure": ["문장 뼈대 분석 1", "문장 뼈대 분석 2", "문장 뼈대 분석 3"],',
-    '  "designStyle": ["디자인 스타일 분석 1", "디자인 스타일 분석 2", "디자인 스타일 분석 3"],',
-    '  "transferRules": ["새 썸네일에 적용할 규칙 1", "규칙 2", "규칙 3"],',
-    '  "cautionNotes": ["그대로 베끼지 않기 위한 주의점 1", "주의점 2"],',
+    '  "copyStructure": ["카피 구조 분석 1", "카피 구조 분석 2", "카피 구조 분석 3"],',
+    '  "designStyle": ["디자인 스타일 1", "디자인 스타일 2", "디자인 스타일 3"],',
+    '  "transferRules": ["적용 규칙 1", "규칙 2", "규칙 3"],',
+    '  "cautionNotes": ["주의점 1", "주의점 2"],',
     '  "summary": "분석 요약",',
     '  "options": [',
     '    { "label": "A", "name": "후킹형", "headline": "메인카피", "subline": "서브카피", "designDirection": "디자인 방향", "prompt": "이미지 생성 프롬프트" },',
     '    { "label": "B", "name": "반전형", "headline": "메인카피", "subline": "서브카피", "designDirection": "디자인 방향", "prompt": "이미지 생성 프롬프트" },',
     '    { "label": "C", "name": "실전형", "headline": "메인카피", "subline": "서브카피", "designDirection": "디자인 방향", "prompt": "이미지 생성 프롬프트" }',
     '  ]',
-    '}',
-    '',
-    '프롬프트 작성 규칙:',
-    '- 각 옵션의 headline은 메인카피 1개만. 짧고 굵게.',
-    '- subline은 최대 1개만. 없으면 빈 문자열로 둬도 돼.',
-    '- 이미지 안에는 메인카피와 서브카피 외 작은 설명문, 말풍선, 배경 글자, 경고 라벨, UI 텍스트를 절대 넣지 마.',
-    '- 디자인 분석은 문구를 어떻게 부각하는지, 어떤 시각 요소 때문에 클릭하고 싶어지는지까지 설명해.',
-    '- 난해해서 의도 파악이 어려운 디자인이면 clickIntent에는 의도 파악 어려움이라고 짧게 써.'
+    '}'
   ].join('\n');
 }
 
@@ -80,10 +97,6 @@ export function buildImagePrompt(option: ThumbnailOption, report: AnalysisReport
     'Main pattern: ' + report.copyBreakdown.mainPattern,
     'Sub pattern: ' + (report.copyBreakdown.subPattern || 'none'),
     report.copyStructure.map((item) => '- ' + item).join('\n'),
-    '',
-    'Variable relationship and adaptation:',
-    report.copyBreakdown.variableMap.map((item) => '- ' + item).join('\n'),
-    report.copyBreakdown.adaptationGuide.map((item) => '- ' + item).join('\n'),
     '',
     'Design style and intent:',
     report.designStyle.map((item) => '- style: ' + item).join('\n'),
@@ -139,6 +152,23 @@ export function normalizeAnalysisReport(report: Partial<AnalysisReport>): Analys
     cautionNotes: list(report.cautionNotes, ['참조 이미지의 로고, 워터마크, 고유 캐릭터는 사용하지 않는다.', '문구를 그대로 베끼지 않는다.']),
     summary: report.summary || '참조 썸네일의 후킹 구조와 디자인 원리를 새 영상 주제에 맞게 재조합한다.',
     options
+  };
+}
+
+export function applyDirectCopy(report: AnalysisReport, mainCopy?: string, subCopy?: string) {
+  const cleanMainCopy = mainCopy?.trim();
+  if (!cleanMainCopy) return report;
+  const cleanSubCopy = subCopy?.trim() || '';
+  return {
+    ...report,
+    copyBreakdown: {
+      ...report.copyBreakdown,
+      mainCopy: cleanMainCopy,
+      subCopy: cleanSubCopy,
+      mainPattern: '사용자가 직접 입력한 메인카피를 그대로 사용',
+      subPattern: cleanSubCopy ? '사용자가 직접 입력한 서브카피를 그대로 사용' : ''
+    },
+    options: report.options.map((option) => ({ ...option, headline: cleanMainCopy, subline: cleanSubCopy }))
   };
 }
 

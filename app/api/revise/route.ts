@@ -31,8 +31,7 @@ export async function POST(request: Request) {
       size: getThumbnailImageSize() as any,
       quality: 'high',
       output_format: 'png',
-      background: 'opaque',
-      input_fidelity: 'high'
+      background: 'opaque'
     } as any);
     const base64 = response.data?.[0]?.b64_json;
     if (!base64) throw new Error('수정 이미지 데이터가 비어 있어.');

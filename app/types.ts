@@ -13,7 +13,24 @@ export type GeneratedOption = ThumbnailOption & {
   imageUrl: string;
 };
 
+export type CopyStructureAnalysis = {
+  mainCopy: string;
+  subCopy: string;
+  mainPattern: string;
+  subPattern: string;
+  variableMap: string[];
+  adaptationGuide: string[];
+};
+
+export type DesignIntentAnalysis = {
+  copyEmphasis: string[];
+  clickIntent: string[];
+  visualHierarchy: string[];
+};
+
 export type AnalysisReport = {
+  copyBreakdown: CopyStructureAnalysis;
+  designIntent: DesignIntentAnalysis;
   copyStructure: string[];
   designStyle: string[];
   transferRules: string[];

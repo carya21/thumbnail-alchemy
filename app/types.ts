@@ -42,6 +42,9 @@ export type AnalysisReport = {
 export type AnalyzeRequest = {
   topic: string;
   tone?: string;
-  copyImage: string;
-  designImage: string;
+  copyImage?: string;
+  designImage?: string;
+  mainCopy?: string;
+  subCopy?: string;
+  designPrompt?: string;
 };

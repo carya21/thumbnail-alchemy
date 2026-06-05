@@ -11,6 +11,9 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState('초보자도 바로 따라 하는 실전형');
+  const [mainCopy, setMainCopy] = useState('');
+  const [subCopy, setSubCopy] = useState('');
+  const [designPrompt, setDesignPrompt] = useState('');
   const [copyImage, setCopyImage] = useState('');
   const [designImage, setDesignImage] = useState('');
   const [report, setReport] = useState<AnalysisReport | null>(null);
@@ -31,7 +34,15 @@ export default function Home() {
 
   async function analyze() {
     await run('analyzing', async () => {
-      const data = await postJson<{ report: AnalysisReport }>('/api/analyze', { topic, tone, copyImage, designImage });
+      const data = await postJson<{ report: AnalysisReport }>('/api/analyze', {
+        topic,
+        tone,
+        mainCopy,
+        subCopy,
+        designPrompt,
+        copyImage,
+        designImage
+      });
       setReport(data.report);
       setOptions([]);
       setRevised(null);
@@ -75,7 +86,7 @@ export default function Home() {
     }
   }
 
-  const readyToAnalyze = Boolean(topic.trim() && copyImage && designImage);
+  const readyToAnalyze = Boolean(topic.trim() && (copyImage || mainCopy.trim()));
 
   return (
     <main className='shell'>
@@ -111,11 +122,32 @@ export default function Home() {
                 <label>원하는 톤</label>
                 <input value={tone} onChange={(event) => setTone(event.target.value)} />
               </div>
-              <div className='uploadGrid'>
-                <Upload title='카피 구조용 썸네일' value={copyImage} onChange={setCopyImage} />
-                <Upload title='디자인 벤치마킹용 썸네일' value={designImage} onChange={setDesignImage} />
-              </div>
-              <button className='primary' onClick={analyze} disabled={!readyToAnalyze || isBusy}>{isBusy ? '분석 중...' : '카피 + 디자인 분석'}</button>
+
+              <section className='inputPanel'>
+                <h2>카피 입력</h2>
+                <p>구조를 참고할 썸네일 이미지를 넣거나, 원하는 메인카피를 바로 입력해도 돼.</p>
+                <div className='field'>
+                  <label>메인카피 (직접 입력 시 필수)</label>
+                  <input value={mainCopy} onChange={(event) => setMainCopy(event.target.value)} placeholder='예: 첫 만남 3마디만 바꿔' />
+                </div>
+                <div className='field'>
+                  <label>서브카피 (선택)</label>
+                  <input value={subCopy} onChange={(event) => setSubCopy(event.target.value)} placeholder='예: 어색함 없이 가까워지는 법' />
+                </div>
+                <Upload title='카피 구조 이미지 (선택)' value={copyImage} onChange={setCopyImage} />
+              </section>
+
+              <section className='inputPanel'>
+                <h2>디자인 참고</h2>
+                <p>이미지로 넣어도 되고, 말로 설명해도 돼. 비워두면 주제와 카피에 맞춰 알아서 판단해.</p>
+                <div className='field'>
+                  <label>디자인 설명 / 이미지 프롬프트 (선택)</label>
+                  <textarea value={designPrompt} onChange={(event) => setDesignPrompt(event.target.value)} placeholder='예: 검정 배경, 노란색 굵은 글씨, 오른쪽에 놀란 표정의 인물, 작은 글자는 거의 없이' />
+                </div>
+                <Upload title='디자인 참고 이미지 (선택)' value={designImage} onChange={setDesignImage} />
+              </section>
+
+              <button className='primary' onClick={analyze} disabled={!readyToAnalyze || isBusy}>{isBusy ? '분석 중...' : '분석 시작'}</button>
             </div>
           )}
 

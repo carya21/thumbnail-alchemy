@@ -16,10 +16,27 @@ const optionSchema = z.object({
   prompt: z.string()
 });
 
+const copyBreakdownSchema = z.object({
+  mainCopy: z.string(),
+  subCopy: z.string(),
+  mainPattern: z.string(),
+  subPattern: z.string(),
+  variableMap: z.array(z.string()),
+  adaptationGuide: z.array(z.string())
+});
+
+const designIntentSchema = z.object({
+  copyEmphasis: z.array(z.string()),
+  clickIntent: z.array(z.string()),
+  visualHierarchy: z.array(z.string())
+});
+
 const schema = z.object({
   topic: z.string().min(1),
   tone: z.string().optional(),
   analysis: z.object({
+    copyBreakdown: copyBreakdownSchema,
+    designIntent: designIntentSchema,
     copyStructure: z.array(z.string()),
     designStyle: z.array(z.string()),
     transferRules: z.array(z.string()),

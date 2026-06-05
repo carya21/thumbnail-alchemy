@@ -121,7 +121,9 @@ export default function Home() {
 
           {step === 1 && report && (
             <div className='stack'>
-              <Report title='카피 구조' items={report.copyStructure} />
+              <CopyBreakdown report={report} />
+              <DesignIntent report={report} />
+              <Report title='카피 구조 요약' items={report.copyStructure} />
               <Report title='디자인 스타일' items={report.designStyle} />
               <Report title='적용 규칙' items={report.transferRules} />
               <Report title='주의점' items={report.cautionNotes} />
@@ -171,6 +173,37 @@ function Upload({ title, value, onChange }: { title: string; value: string; onCh
       <div className='preview'>{value ? <img src={value} alt={title} /> : <span>이미지 업로드</span>}</div>
     </div>
   );
+}
+
+function CopyBreakdown({ report }: { report: AnalysisReport }) {
+  return (
+    <section className='insight'>
+      <h2>메인/서브카피 구조 해체</h2>
+      <div className='copyPair'>
+        <div><span>메인카피</span><strong>{report.copyBreakdown.mainCopy}</strong></div>
+        <div><span>서브카피</span><strong>{report.copyBreakdown.subCopy || '없음'}</strong></div>
+      </div>
+      <div className='miniBlock'><span>메인 뼈대</span><p>{report.copyBreakdown.mainPattern}</p></div>
+      <div className='miniBlock'><span>서브 뼈대</span><p>{report.copyBreakdown.subPattern || '서브카피 없음'}</p></div>
+      <InlineList title='변수 관계' items={report.copyBreakdown.variableMap} />
+      <InlineList title='새 주제 치환' items={report.copyBreakdown.adaptationGuide} />
+    </section>
+  );
+}
+
+function DesignIntent({ report }: { report: AnalysisReport }) {
+  return (
+    <section className='insight'>
+      <h2>디자인 클릭 의도</h2>
+      <InlineList title='문구 부각 방식' items={report.designIntent.copyEmphasis} />
+      <InlineList title='클릭 유도 포인트' items={report.designIntent.clickIntent} />
+      <InlineList title='시선 순서' items={report.designIntent.visualHierarchy} />
+    </section>
+  );
+}
+
+function InlineList({ title, items }: { title: string; items: string[] }) {
+  return <div className='inlineList'><span>{title}</span><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></div>;
 }
 
 function Report({ title, items }: { title: string; items: string[] }) {

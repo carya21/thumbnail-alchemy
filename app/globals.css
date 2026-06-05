@@ -37,6 +37,9 @@ h1 { margin: 0; font-size: clamp(34px, 5vw, 64px); line-height: .95; letter-spac
 .rail .active { background: var(--yellow); }
 .panel { min-height: 560px; padding: 20px; }
 .stack { display: grid; gap: 16px; }
+.inputPanel { display: grid; gap: 14px; padding: 16px; background: #fffdf4; border: 2px solid var(--ink); border-radius: 8px; box-shadow: 5px 5px 0 rgba(18,18,18,.1); }
+.inputPanel h2 { margin: 0; font-size: 20px; }
+.inputPanel p { margin: -6px 0 0; color: var(--muted); line-height: 1.45; font-weight: 700; }
 .field { display: grid; gap: 8px; }
 label { font-weight: 900; }
 input, textarea { width: 100%; border: 2px solid var(--line); border-radius: 8px; background: white; color: var(--ink); outline: none; }
@@ -71,4 +74,4 @@ input:focus, textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 4px rg
 .card button + button { background: var(--green); }
 .result { max-width: 900px; }
 @media (max-width: 900px) { .hero, .workspace, .uploadGrid, .cards, .copyPair { grid-template-columns: 1fr; } .rail { position: static; } }
-@media (max-width: 560px) { .shell { padding: 14px; } .panel, .rail { padding: 12px; } }
+@media (max-width: 560px) { .shell { padding: 14px; } .panel, .rail { padding: 12px; } .inputPanel { padding: 12px; } }

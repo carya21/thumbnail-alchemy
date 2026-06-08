@@ -3,7 +3,7 @@ import { dataUrlToParts } from './validation';
 
 export function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('OPENAI_API_KEY가 아직 설정되지 않았어.');
+  if (!apiKey) throw new Error('OPENAI_API_KEY가 아직 설정되지 않았습니다.');
   return new OpenAI({ apiKey });
 }
 

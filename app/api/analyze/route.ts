@@ -68,6 +68,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ report });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message.includes('OPENAI_API_KEY') ? message : '분석 중 문제가 생겼어: ' + message }, { status: 500 });
+    const errorMessage = message.includes('OPENAI_API_KEY') ? message : '분석 중 문제가 생겼습니다: ' + message;
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

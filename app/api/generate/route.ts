@@ -66,13 +66,14 @@ export async function POST(request: Request) {
         moderation: 'auto'
       } as any);
       const base64 = response.data?.[0]?.b64_json;
-      if (!base64) throw new Error(option.label + '안 이미지 데이터가 비어 있어.');
+      if (!base64) throw new Error(option.label + '안 이미지 데이터가 비어 있습니다.');
       return { ...option, prompt, imageUrl: imageBase64ToDataUrl(base64) } satisfies GeneratedOption;
     }));
 
     return NextResponse.json({ options });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message.includes('OPENAI_API_KEY') ? message : 'ABC 이미지 생성 중 문제가 생겼어: ' + message }, { status: 500 });
+    const errorMessage = message.includes('OPENAI_API_KEY') ? message : 'ABC 이미지 생성 중 문제가 생겼습니다: ' + message;
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

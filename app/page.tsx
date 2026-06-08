@@ -10,7 +10,6 @@ const stepNames = ['입력', '분석', 'ABC안', '수정'];
 export default function Home() {
   const [step, setStep] = useState(0);
   const [topic, setTopic] = useState('');
-  const [tone, setTone] = useState('초보자도 바로 따라 하는 실전형');
   const [mainCopy, setMainCopy] = useState('');
   const [subCopy, setSubCopy] = useState('');
   const [designPrompt, setDesignPrompt] = useState('');
@@ -19,7 +18,7 @@ export default function Home() {
   const [report, setReport] = useState<AnalysisReport | null>(null);
   const [options, setOptions] = useState<GeneratedOption[]>([]);
   const [selectedLabel, setSelectedLabel] = useState<OptionLabel>('A');
-  const [revisionRequest, setRevisionRequest] = useState('글자를 더 크게, 배경은 더 단순하게');
+  const [revisionRequest, setRevisionRequest] = useState('글자를 더 크게, 배경은 더 단순하게 수정해 주세요.');
   const [revised, setRevised] = useState<GeneratedOption | null>(null);
   const [busy, setBusy] = useState<Busy>('idle');
   const [message, setMessage] = useState('');
@@ -36,7 +35,6 @@ export default function Home() {
     await run('analyzing', async () => {
       const data = await postJson<{ report: AnalysisReport }>('/api/analyze', {
         topic,
-        tone,
         mainCopy,
         subCopy,
         designPrompt,
@@ -47,19 +45,19 @@ export default function Home() {
       setOptions([]);
       setRevised(null);
       setStep(1);
-      setMessage('분석 완료. 이제 ABC안을 만들면 돼.');
+      setMessage('분석이 완료되었습니다. 이제 ABC안을 생성하실 수 있습니다.');
     });
   }
 
   async function generate() {
     if (!report) return;
     await run('generating', async () => {
-      const data = await postJson<{ options: GeneratedOption[] }>('/api/generate', { topic, tone, analysis: report });
+      const data = await postJson<{ options: GeneratedOption[] }>('/api/generate', { topic, analysis: report });
       setOptions(data.options);
       setSelectedLabel(data.options[0]?.label || 'A');
       setRevised(null);
       setStep(2);
-      setMessage('ABC안 생성 완료. 마음에 드는 안을 골라줘.');
+      setMessage('ABC안 생성이 완료되었습니다. 마음에 드는 안을 선택해 주세요.');
     });
   }
 
@@ -69,7 +67,7 @@ export default function Home() {
       const data = await postJson<{ revised: GeneratedOption }>('/api/revise', { selected, revisionRequest });
       setRevised(data.revised);
       setStep(3);
-      setMessage('수정본 완성. 다운로드해서 바로 쓰면 돼.');
+      setMessage('수정본이 완성되었습니다. 다운로드해서 바로 사용하실 수 있습니다.');
     });
   }
 
@@ -94,7 +92,7 @@ export default function Home() {
         <div>
           <p className='eyebrow'>똑사장 썸네일 제작실</p>
           <h1>썸네일 알케미</h1>
-          <p className='lead'>카피 구조와 디자인 스타일을 분리 분석해서 새 썸네일 ABC안을 만들어.</p>
+          <p className='lead'>카피 구조와 디자인 스타일을 분리 분석해서 새 썸네일 ABC안을 만들어 드립니다.</p>
         </div>
         <div className='now'>현재 단계<br /><strong>{stepNames[step]}</strong></div>
       </header>
@@ -116,33 +114,30 @@ export default function Home() {
             <div className='stack'>
               <div className='field'>
                 <label>새 영상 주제</label>
-                <input value={topic} onChange={(event) => setTopic(event.target.value)} placeholder='예: AI 쇼츠 자동화 처음 시작하는 법' />
-              </div>
-              <div className='field'>
-                <label>원하는 톤</label>
-                <input value={tone} onChange={(event) => setTone(event.target.value)} />
+                <input value={topic} onChange={(event) => setTopic(event.target.value)} placeholder='만들고 싶은 영상 주제를 입력해 주세요.' />
               </div>
 
               <section className='inputPanel'>
                 <h2>카피 입력</h2>
-                <p>구조를 참고할 썸네일 이미지를 넣거나, 원하는 메인카피를 바로 입력해도 돼.</p>
+                <p>카피 구조 이미지를 넣거나, 이미 정해둔 썸네일 문구를 직접 입력하실 수 있습니다.</p>
                 <div className='field'>
-                  <label>메인카피 (직접 입력 시 필수)</label>
-                  <input value={mainCopy} onChange={(event) => setMainCopy(event.target.value)} placeholder='예: 첫 만남 3마디만 바꿔' />
+                  <label>메인카피</label>
+                  <em>이미 썸네일로 만들고 싶은 문구를 정하셨다면 이 부분에 적어주세요. 썸네일 분석을 따로 마친 경우라면 아래에 사진을 입력하지 않아도 됩니다.</em>
+                  <input value={mainCopy} onChange={(event) => setMainCopy(event.target.value)} placeholder='썸네일에서 가장 크게 보일 문구를 입력해 주세요.' />
                 </div>
                 <div className='field'>
                   <label>서브카피 (선택)</label>
-                  <input value={subCopy} onChange={(event) => setSubCopy(event.target.value)} placeholder='예: 어색함 없이 가까워지는 법' />
+                  <input value={subCopy} onChange={(event) => setSubCopy(event.target.value)} placeholder='보조 문구가 있다면 입력해 주세요.' />
                 </div>
                 <Upload title='카피 구조 이미지 (선택)' value={copyImage} onChange={setCopyImage} />
               </section>
 
               <section className='inputPanel'>
                 <h2>디자인 참고</h2>
-                <p>이미지로 넣어도 되고, 말로 설명해도 돼. 비워두면 주제와 카피에 맞춰 알아서 판단해.</p>
+                <p>참고 이미지를 넣거나 디자인 방향을 글로 설명하실 수 있습니다. 비워두면 주제와 카피에 맞춰 자동으로 구성합니다.</p>
                 <div className='field'>
                   <label>디자인 설명 / 이미지 프롬프트 (선택)</label>
-                  <textarea value={designPrompt} onChange={(event) => setDesignPrompt(event.target.value)} placeholder='예: 검정 배경, 노란색 굵은 글씨, 오른쪽에 놀란 표정의 인물, 작은 글자는 거의 없이' />
+                  <textarea value={designPrompt} onChange={(event) => setDesignPrompt(event.target.value)} placeholder='원하시는 분위기, 색감, 인물 배치 등을 자유롭게 적어 주세요.' />
                 </div>
                 <Upload title='디자인 참고 이미지 (선택)' value={designImage} onChange={setDesignImage} />
               </section>
@@ -256,7 +251,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
     body: JSON.stringify(body)
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || '요청 처리 중 문제가 생겼어.');
+  if (!response.ok) throw new Error(data.error || '요청 처리 중 문제가 생겼습니다.');
   return data;
 }
 

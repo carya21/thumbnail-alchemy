@@ -34,10 +34,11 @@ export async function POST(request: Request) {
       background: 'opaque'
     } as any);
     const base64 = response.data?.[0]?.b64_json;
-    if (!base64) throw new Error('수정 이미지 데이터가 비어 있어.');
+    if (!base64) throw new Error('수정 이미지 데이터가 비어 있습니다.');
     return NextResponse.json({ revised: { ...body.selected, imageUrl: imageBase64ToDataUrl(base64) } });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message.includes('OPENAI_API_KEY') ? message : '수정 중 문제가 생겼어: ' + message }, { status: 500 });
+    const errorMessage = message.includes('OPENAI_API_KEY') ? message : '수정 중 문제가 생겼습니다: ' + message;
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
